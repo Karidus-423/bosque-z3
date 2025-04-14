@@ -5,6 +5,8 @@ class TempTest {
 public:
   bool boolean;
   unsigned int nat;
+  int whole;
+  float real;
 };
 
 #endif
