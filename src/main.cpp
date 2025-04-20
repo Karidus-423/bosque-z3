@@ -1,45 +1,29 @@
-// Your tool will take this SMT file in and load it in Z3. From there it will:
-//
-//     1) Take a function (api) signature and define constants for each of the
-//        arguments and return — asserting that f(a, b, c) = res.
-//     2) Then it will check that all this is Satisfiable
-//     3) From there you do the push/pop as you describe in your 1,2,3 steps.
-//
-//
-// For now we are assuming that these are all simple scalar values. Once you can
-// do the 1-3 steps for extracting Bool, Nat, Int, and Strings, then we will
-// move on to working with more complex composite types.
-
-#include "utils.hpp"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <z3++.h>
 
-void Test() {
-  z3::context c;
-  z3::expr boolean = c.bool_const("boolean");
-  z3::expr natural = c.int_const("natural");
-  z3::expr real = c.int_const("c");
-
-  z3::sort domain = c.bool_sort();
-
-  z3::func_decl GetUser = c.function("GetUser", b);
-
-  z3::solver s(c);
-}
+// Get list of function signatures and type definitions.
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    std::printf("Usage: <FILENAME>\n");
-    return 1;
+    printf("Usage: %s <FILENAME>\n", argv[0]);
+    exit(1);
   }
 
-  File_t *file = FileOpen(argv[1]);
-  if (file == NULL) {
-    printf("Retrieving file contents failed\n");
-    return 1;
+  const char *filename = argv[1];
+  z3::context ctx;
+  z3::expr_vector expressions = ctx.parse_file(filename);
+  for (int i = 0; i < expressions.size(); i++) {
+    std::cout << expressions[i] << "\n";
   }
 
-  Test();
+  z3::solver s(ctx);
+  s.add(expressions);
+  s.check();
+  z3::model m = s.get_model();
+  std::cout << "MODEL: \n" << m << "\n";
 
   return 0;
 }
