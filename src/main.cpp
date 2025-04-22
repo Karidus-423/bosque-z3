@@ -1,3 +1,4 @@
+#include "main.hpp"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -5,84 +6,108 @@
 #include <z3++.h>
 #include <z3_api.h>
 
-// UPLOAD FILE, TODO: Figure out how to extract function signatures from it.
-//  const char *filename = argv[1];
-//  z3::expr_vector file_expr = ctx.parse_file(filename);
-//  s.add(file_expr);
-
-// To extract the function, pass the function and traverse the domain and
-// range of it to find the types(sorts) for which to find the reals values
-// of.
-//
-
-// This function should return all the values that were valid.
-// But for that the solver is needed.
-
-// TODO: Change using different methods.
-void FindValidInt(z3::func_decl func, unsigned argc, z3::solver *s) {
-  int try_val = 20;
-  s->push();
-  z3::expr use_val = s->ctx().int_val(try_val);
-  z3::expr apply_arg = func(use_val);
-  s->add(apply_arg == use_val);
-  std::cout << s->check() << "\n";
-  std::cout << s->get_model() << "\n";
-  s->pop();
-}
-
-void ExamineFuncDecl(z3::func_decl func, z3::solver *s) {
-  unsigned args = func.arity();
-  for (unsigned i = 0; i < args; i++) {
-    z3::sort domain_arg = func.domain(i);
-    switch (domain_arg.sort_kind()) {
-    case Z3_INT_SORT:
-      FindValidInt(func, i, s);
-      break;
-    case Z3_BOOL_SORT:
-      // FindValidBool()
-      break;
-    case Z3_CHAR_SORT:
-      // FindValidChar()
-      break;
-    case Z3_SEQ_SORT:
-      // FindValidString(unsigned length)
-      break;
-    default:
-      printf("Its a kind\n");
-    }
+void FindAssertion(z3::solver &s, Z3_sort_kind type, z3::func_decl fn,
+                   z3::sort sort_type) {
+  printf("Type: ");
+  switch (type) {
+  case Z3_UNINTERPRETED_SORT:
+    printf("Z3_UNINTERPRETED_SORT\n");
+    break;
+  case Z3_BOOL_SORT:
+    printf("Z3_BOOL_SORT\n");
+    break;
+  case Z3_INT_SORT:
+    printf("Z3_INT_SORT\n");
+    FindIntAssertion(s, fn, sort_type);
+    break;
+  case Z3_REAL_SORT:
+    printf("Z3_REAL_SORT\n");
+    break;
+  case Z3_BV_SORT:
+    printf("Z3_BV_SORT\n");
+    break;
+  case Z3_ARRAY_SORT:
+    printf("Z3_ARRAY_SORT\n");
+    break;
+  case Z3_DATATYPE_SORT:
+    printf("Z3_DATATYPE_SORT\n");
+    FindDataTypeFields(s, sort_type);
+    break;
+  case Z3_RELATION_SORT:
+    printf("Z3_RELATION_SORT\n");
+    break;
+  case Z3_FINITE_DOMAIN_SORT:
+    printf("Z3_FINITE_DOMAIN_SORT\n");
+    break;
+  case Z3_FLOATING_POINT_SORT:
+    printf("Z3_FLOATING_POINT_SORT\n");
+    break;
+  case Z3_ROUNDING_MODE_SORT:
+    printf("Z3_ROUNDING_MODE_SORT\n");
+    break;
+  case Z3_SEQ_SORT:
+    printf("Z3_SEQ_SORT\n");
+    break;
+  case Z3_RE_SORT:
+    printf("Z3_RE_SORT\n");
+    break;
+  case Z3_CHAR_SORT:
+    printf("Z3_CHAR_SORT\n");
+    break;
+  case Z3_TYPE_VAR:
+    printf("Z3_TYPE_VAR\n");
+    break;
+  case Z3_UNKNOWN_SORT:
+    printf("Z3_UNKNOWN_SORT\n");
+    break;
   }
 }
 
-void GetValues(z3::solver *s) {
-  z3::model m = s->get_model();
-  unsigned functions_n = m.num_funcs();
-
-  for (unsigned i = 0; i < functions_n; i++) {
-    ExamineFuncDecl(m.get_func_decl(i), s);
+void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
+  std::cout << "\033[1;32m" << fn.name() << "\033[0m\n";
+  printf("\033[4;33mDomain Arguments: %d\033[0m\n", fn_args);
+  for (int j = 0; j < fn_args; j++) {
+    Z3_sort_kind type = fn.domain(j).sort_kind();
+    FindAssertion(s, type, fn, fn.domain(j));
   }
 }
+
+void AnalyzeModel(z3::solver &s, z3::model m) {
+  unsigned n_const = m.num_consts();
+  printf("--------\033[1;35mTotal Constants: %d\033[0m-----------\n", n_const);
+  for (int i = 0; i < n_const; i++) {
+    std::cout << i << ":\t" << m.get_const_decl(i) << "\n";
+  }
+
+  unsigned n_func = m.num_funcs();
+  printf("--------\033[1;35mTotal Functions: %d\033[0m-----------\n", n_func);
+  for (int i = 0; i < n_func; i++) {
+    z3::func_decl fn = m.get_func_decl(i);
+    unsigned int fn_args = fn.arity();
+
+    std::cout << i << ":\t" << fn << "\n";
+    AnalyzeFuncDecl(s, fn, fn_args);
+  }
+};
 
 int main(int argc, char **argv) {
-  // Declare a function on the context.
-  if (argv[1] == NULL) {
+  const char *filename = argv[1];
+  if (filename == NULL) {
     printf("USAGE: %s <FILENAME>\n", argv[0]);
     exit(1);
   }
+
   z3::context c;
-  z3::expr x = c.int_const("x");
-  z3::expr y = c.int_const("y");
-  z3::sort I = c.int_sort();
-  z3::func_decl g = function("g", I, I);
-
+  z3::expr_vector expressions = c.parse_file(filename);
   z3::solver s(c);
-  s.add(x >= 1);
-  s.add(y < x + 3);
-  s.add(g(y) == x);
+  s.add(expressions);
 
-  // If unsat then this will never be false, hence always true.
   if (s.check() == z3::sat) {
-    printf("Values:\n");
-    GetValues(&s);
+    printf("--------\033[1;34mSAT\033[0m-------------\n");
+    z3::model m = s.get_model();
+    printf("--------\033[1;35mMODEL\033[0m-----------\n");
+    std::cout << m << "\n";
+    AnalyzeModel(s, m);
   } else {
     printf("UNSAT\n");
   }

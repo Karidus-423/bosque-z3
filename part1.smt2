@@ -1,8 +1,11 @@
-(declare-datatype None ((none)))
-;;Bool is Bool
-(define-sort Nat () Int)
-;;Int is Int
-(define-sort BigNat () Int)
-(define-sort BigInt () Int)
-(define-sort Float () Real)
-(define-sort CString () String)
+(declare-fun TestFunc (Int Bool) Int)
+(declare-const res Int)
+
+(declare-const integer Int)
+(declare-const boolean Bool)
+
+(assert (= boolean true))
+(assert (= res (TestFunc integer boolean)))
+
+(check-sat)
+(get-model)
