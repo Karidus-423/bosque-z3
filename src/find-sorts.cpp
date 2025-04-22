@@ -16,18 +16,3 @@ void FindDataTypeFields(z3::solver &s, z3::sort data_type) {
     AnalyzeFuncDecl(s, fn, fn_args);
   }
 }
-
-void FindIntAssertion(z3::solver &s, z3::func_decl fn, z3::sort expr_int) {
-  int asserted_int;
-  int low = -500; // TODO: Change to use DEFINE
-  int high = 500;
-  int try_int = low;
-
-  for (; s.check() != z3::sat; try_int++) {
-    s.push();
-    s.pop();
-  }
-  asserted_int = try_int;
-
-  std::cout << "Value: " << asserted_int << "\n---\n";
-}

@@ -6,70 +6,43 @@
 #include <z3++.h>
 #include <z3_api.h>
 
-void FindAssertion(z3::solver &s, Z3_sort_kind type, z3::func_decl fn,
-                   z3::sort sort_type) {
-  printf("Type: ");
-  switch (type) {
-  case Z3_UNINTERPRETED_SORT:
-    printf("Z3_UNINTERPRETED_SORT\n");
+z3::expr TrySortExpr(z3::context &ctx, Z3_sort_kind arg_t) {
+  switch (arg_t) {
+  case Z3_INT_SORT:
+    return ctx.int_val(28);
     break;
   case Z3_BOOL_SORT:
-    printf("Z3_BOOL_SORT\n");
+    return ctx.bool_val(false);
     break;
-  case Z3_INT_SORT:
-    printf("Z3_INT_SORT\n");
-    FindIntAssertion(s, fn, sort_type);
-    break;
-  case Z3_REAL_SORT:
-    printf("Z3_REAL_SORT\n");
-    break;
-  case Z3_BV_SORT:
-    printf("Z3_BV_SORT\n");
-    break;
-  case Z3_ARRAY_SORT:
-    printf("Z3_ARRAY_SORT\n");
-    break;
-  case Z3_DATATYPE_SORT:
-    printf("Z3_DATATYPE_SORT\n");
-    FindDataTypeFields(s, sort_type);
-    break;
-  case Z3_RELATION_SORT:
-    printf("Z3_RELATION_SORT\n");
-    break;
-  case Z3_FINITE_DOMAIN_SORT:
-    printf("Z3_FINITE_DOMAIN_SORT\n");
-    break;
-  case Z3_FLOATING_POINT_SORT:
-    printf("Z3_FLOATING_POINT_SORT\n");
-    break;
-  case Z3_ROUNDING_MODE_SORT:
-    printf("Z3_ROUNDING_MODE_SORT\n");
-    break;
-  case Z3_SEQ_SORT:
-    printf("Z3_SEQ_SORT\n");
-    break;
-  case Z3_RE_SORT:
-    printf("Z3_RE_SORT\n");
-    break;
-  case Z3_CHAR_SORT:
-    printf("Z3_CHAR_SORT\n");
-    break;
-  case Z3_TYPE_VAR:
-    printf("Z3_TYPE_VAR\n");
-    break;
-  case Z3_UNKNOWN_SORT:
-    printf("Z3_UNKNOWN_SORT\n");
-    break;
+  default:
+    printf("Wait Please\n");
   }
+  return ctx.int_const("not found");
 }
 
 void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
-  std::cout << "\033[1;32m" << fn.name() << "\033[0m\n";
+  std::cout << "\033[1;32mFunction: \033[0m" << fn.name() << "\n";
   printf("\033[4;33mDomain Arguments: %d\033[0m\n", fn_args);
-  for (int j = 0; j < fn_args; j++) {
-    Z3_sort_kind type = fn.domain(j).sort_kind();
-    FindAssertion(s, type, fn, fn.domain(j));
+  // 1)Get the Type of the arguments.
+  // 2) Find values for each arg, assert the return type
+  // 3) assert a use of the fun to == res
+
+  s.push();
+  z3::context &ctx = fn.ctx();
+  z3::expr_vector args(ctx);
+  z3::expr result = ctx.constant("result", fn.range());
+
+  for (int i = 0; i < fn_args; i++) {
+    z3::expr test_arg = TrySortExpr(ctx, fn.domain(i).sort_kind());
+    args.push_back(test_arg);
   }
+
+  z3::expr func_assert = fn(args);
+  s.add(func_assert == result);
+
+  std::cout << s.check() << "\n";
+  std::cout << s.get_model() << "\n";
+  s.pop();
 }
 
 void AnalyzeModel(z3::solver &s, z3::model m) {
