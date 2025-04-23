@@ -1,7 +1,8 @@
-(declare-const integer Int)
-(declare-const boolean Bool)
+(declare-const integer1 Int)
+(declare-const integer2 Int)
+(declare-const integer3 Int)
 
-(declare-fun TestFunc (Int Bool) Int)
+(declare-fun TestFunc (Int) Int)
 (declare-const res Int)
 
-(assert (= res (TestFunc integer boolean)))
+(assert (= res (TestFunc integer1 )))
