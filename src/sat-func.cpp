@@ -1,13 +1,14 @@
 #include "main.hpp"
 #include <iostream>
+#include <z3++.h>
 
-z3::expr TrySortExpr(z3::solver &s, z3::func_decl fn, int arg_n) {
+z3::expr TrySortExpr(z3::solver &s, z3::func_decl fn, int arg_pos) {
   z3::context &ctx = s.ctx();
-  Z3_sort_kind arg_t = fn.domain(arg_n).sort_kind();
+  Z3_sort_kind arg_t = fn.domain(arg_pos).sort_kind();
 
   switch (arg_t) {
   case Z3_INT_SORT: {
-    z3::expr try_int = FindInt(s, fn, arg_n);
+    z3::expr try_int = FindInt(s, fn, arg_pos);
     return try_int;
   }
   case Z3_BOOL_SORT:
@@ -34,15 +35,22 @@ void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
   // i = 0; 0th arg will have val and rest dummy.
   // If SAT continue, add to ctx/print and continue to next arg.
   for (int i = 0; i < fn_args; i++) {
+    std::cout << "ARG " << i;
     z3::expr test_arg = TrySortExpr(s, fn, i);
-    std::cout << test_arg << "\n";
     args.push_back(test_arg);
+    std::cout << " |VALUE " << test_arg << "\n";
+    s.add(test_arg);
   }
 
   z3::expr func_assert = fn(args);
   s.add(func_assert == result);
 
-  std::cout << s.check() << "\n";
-  std::cout << s.get_model() << "\n";
+  z3::check_result rr = s.check();
   s.pop();
+
+  if (rr == z3::sat) {
+    std::cout << "All values found for func" << "\n";
+  } else {
+    std::cout << "Unable to find sat values for func" << "\n";
+  }
 }
