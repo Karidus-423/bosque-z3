@@ -20,7 +20,8 @@ void FindDataTypeFields(z3::solver &s, z3::sort data_type) {
 }
 
 // int arg_pos it 0th index
-z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos) {
+z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos,
+                 z3::expr_vector &known_args) {
   const std::vector<int> int_vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   z3::context &ctx = s.ctx();
   int total_args = fn.arity();
@@ -29,12 +30,12 @@ z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos) {
   for (int i = 0; i < int_vec.size(); i++) {
     int try_int = int_vec[i];
 
-    // FIXME: The previous arguments for the function that are added when
-    // leaving FindInt are not passed onto fn(args). Find a way to verify that
-    // the added arguments exist.
     s.push();
     z3::context &fn_ctx = fn.ctx();
     z3::expr_vector args(fn_ctx);
+    for (unsigned j = 0; j < known_args.size(); ++j) {
+      args.push_back(known_args[j]);
+    }
     z3::expr try_expr = ctx.int_val(try_int);
     args.push_back(try_expr);
 
@@ -44,8 +45,6 @@ z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos) {
 
       for (int j = 0; j < dummy_expr.size(); j++) {
         args.push_back(dummy_expr[j]);
-        std::cout << "DUMMY EXPR: " << dummy_expr[j]
-                  << "TYPE:" << dummy_expr[j].get_sort() << "\n";
       }
     }
     // Build fun assertion

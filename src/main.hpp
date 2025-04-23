@@ -11,7 +11,8 @@ typedef struct {
 } satFunc_t;
 
 z3::expr GetFuncRangeExpr(z3::context ctx, Z3_sort_kind sort_t);
-z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_n);
+z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos,
+                 z3::expr_vector &known_args);
 std::vector<z3::expr> GetDummies(z3::context &ctx, z3::func_decl fn, int start);
 
 void FindDataTypeFields(z3::solver &s, z3::sort expr_sort);
