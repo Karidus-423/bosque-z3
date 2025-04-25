@@ -34,7 +34,7 @@ void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
   // 3) assert a use of the fun to == res
 
   s.push();
-  z3::context &ctx = fn.ctx();
+  z3::context &ctx = s.ctx();
   z3::expr_vector args(ctx);
   z3::expr result = ctx.constant("result", fn.range());
   // i = 0; 0th arg will have val and rest dummy.

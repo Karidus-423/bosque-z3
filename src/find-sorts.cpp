@@ -18,13 +18,14 @@ void FindDataType(z3::solver &s, z3::func_decl fn, int arg_pos,
   z3::sort main_foo = fn.domain(arg_pos);
   std::cout << main_foo << "\n";
   printf("Constructors\n");
+  // Returns the size of the constructor
   unsigned n = Z3_get_datatype_sort_num_constructors(ctx, main_foo);
   z3::func_decl_vector main_foo_fields = main_foo.constructors();
   for (int i = 0; i < main_foo_fields.size(); i++) {
     AnalyzeFuncDecl(s, main_foo_fields[i], main_foo_fields[i].arity());
   }
-  std::cout << main_foo.constructors() << ": " << n << "\n";
-  std::cout << main_foo_fields[0] << ": " << n << "\n";
+  // std::cout << main_foo.constructors() << ": " << n << "\n";
+  // std::cout << main_foo_fields[0] << ": " << n << "\n";
 
   z3::check_result rr = s.check();
   s.pop();
