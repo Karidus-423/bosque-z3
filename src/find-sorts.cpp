@@ -5,21 +5,37 @@
 #include <z3++.h>
 #include <z3_api.h>
 
-// Theory of Constructors
-void FindDataTypeFields(z3::solver &s, z3::sort data_type) {
-  z3::func_decl_vector constructs = data_type.constructors();
+void FindDataType(z3::solver &s, z3::func_decl fn, int arg_pos,
+                  z3::expr_vector &known_args) {
+  printf("\nFinding Data type\n");
+  z3::context &ctx = s.ctx();
+  s.push();
+  // Adding found argument expressions to current function context
+  z3::context &fn_ctx = fn.ctx();
+  z3::expr_vector args(fn_ctx);
 
-  for (unsigned i = 0; i < constructs.size(); ++i) {
-    z3::func_decl fn = constructs[i];
-    unsigned int fn_args = fn.arity();
-    std::cout << "Constructor \033[1;35m" << fn.name() << "\033[0m" << "\n";
-    // You can call ctors[i].arity() to get number of fields in that constructor
-    // TODO: Change how to build constructors.
-    AnalyzeFuncDecl(s, fn, fn_args);
+  // Datatype Main@Foo
+  z3::sort main_foo = fn.domain(arg_pos);
+  std::cout << main_foo << "\n";
+  printf("Constructors\n");
+  unsigned n = Z3_get_datatype_sort_num_constructors(ctx, main_foo);
+  z3::func_decl_vector main_foo_fields = main_foo.constructors();
+  for (int i = 0; i < main_foo_fields.size(); i++) {
+    AnalyzeFuncDecl(s, main_foo_fields[i], main_foo_fields[i].arity());
+  }
+  std::cout << main_foo.constructors() << ": " << n << "\n";
+  std::cout << main_foo_fields[0] << ": " << n << "\n";
+
+  z3::check_result rr = s.check();
+  s.pop();
+
+  if (rr == z3::sat) {
+    // Return found expression of completed constructor
+    // return data_type;
   }
 }
 
-// int arg_pos it 0th index
+// Find sat assertion for arg type int
 z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos,
                  z3::expr_vector &known_args) {
   const std::vector<int> int_vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -31,6 +47,7 @@ z3::expr FindInt(z3::solver &s, z3::func_decl fn, int arg_pos,
     int try_int = int_vec[i];
 
     s.push();
+    // Adding found argument expressions to current function context
     z3::context &fn_ctx = fn.ctx();
     z3::expr_vector args(fn_ctx);
     for (unsigned j = 0; j < known_args.size(); ++j) {

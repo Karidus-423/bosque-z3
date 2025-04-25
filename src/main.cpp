@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+  // Injecting SMTfile to Z3 API.
   z3::context c;
   z3::expr_vector expressions = c.parse_file(filename);
   z3::solver s(c);

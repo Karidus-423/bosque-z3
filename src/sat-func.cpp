@@ -16,6 +16,10 @@ z3::expr TrySortExpr(z3::solver &s, z3::func_decl fn, int arg_pos,
     return ctx.bool_val(false);
   case Z3_SEQ_SORT:
     return ctx.string_val("Test");
+  case Z3_DATATYPE_SORT: {
+    FindDataType(s, fn, arg_pos, known_args);
+    return ctx.constant("tmp_const", fn.domain(arg_pos));
+  }
   default:
     std::cout << "None for " << arg_t << "\n";
     return ctx.int_const("not found");
