@@ -26,19 +26,21 @@ z3::expr TrySortExpr(z3::solver &s, z3::func_decl fn, int arg_pos,
   }
 }
 
-void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
+std::string AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn,
+                            unsigned int fn_args) {
   std::cout << "\033[1;32mFunction: \033[0m" << fn.name() << "\n";
   printf("\033[4;33mDomain Arguments: %d\033[0m\n", fn_args);
   // 1)Get the Type of the arguments.
   // 2) Find values for each arg, assert the return type
   // 3) assert a use of the fun to == res
 
+  std::string found_func;
+
   s.push();
   z3::context &ctx = s.ctx();
   z3::expr_vector args(ctx);
   z3::expr result = ctx.constant("result", fn.range());
-  // i = 0; 0th arg will have val and rest dummy.
-  // If SAT continue, add to ctx/print and continue to next arg.
+
   for (int i = 0; i < fn_args; i++) {
     std::cout << "ARG " << i;
     z3::expr test_arg = TrySortExpr(s, fn, i, args);
@@ -57,4 +59,6 @@ void AnalyzeFuncDecl(z3::solver &s, z3::func_decl fn, unsigned int fn_args) {
   } else {
     std::cout << "Unable to find sat values for func" << "\n";
   }
+
+  return found_func;
 }

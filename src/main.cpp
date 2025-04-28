@@ -3,10 +3,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 #include <z3++.h>
 #include <z3_api.h>
 
-void AnalyzeModel(z3::solver &s, z3::model m) {
+std::vector<std::string> AnalyzeModel(z3::solver &s, z3::model m) {
+  std::vector<std::string> found_values;
+
   unsigned n_const = m.num_consts();
   printf("--------\033[1;35mTotal Constants: %d\033[0m-----------\n", n_const);
   for (int i = 0; i < n_const; i++) {
@@ -20,8 +23,11 @@ void AnalyzeModel(z3::solver &s, z3::model m) {
     unsigned int fn_args = fn.arity();
 
     std::cout << i << ":\t" << fn << "\n";
-    AnalyzeFuncDecl(s, fn, fn_args);
+    std::string found_val = AnalyzeFuncDecl(s, fn, fn_args);
+    found_values.push_back(found_val);
   }
+
+  return found_values;
 };
 
 int main(int argc, char **argv) {
@@ -37,13 +43,15 @@ int main(int argc, char **argv) {
   z3::solver s(c);
   s.add(expressions);
 
+  std::vector<std::string> found_values;
+
   if (s.check() == z3::sat) {
-    printf("--------\033[1;34mSAT\033[0m-------------\n");
+    printf("--------\033[1;34mFormula:SAT\033[0m-------------\n");
     z3::model m = s.get_model();
     printf("--------\033[1;35mMODEL\033[0m-----------\n");
     std::cout << m << "\n";
-    AnalyzeModel(s, m);
+    found_values = AnalyzeModel(s, m);
   } else {
-    printf("UNSAT\n");
+    printf("--------\033[1;31mFormula: UNSAT\033[0m-------------\n");
   }
 }
