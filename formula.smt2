@@ -87,5 +87,5 @@
 
 (assert (= res @Result-err-other))
 
-;;(check-sat)
-;;(get-model)
+(check-sat)
+(get-model)
