@@ -6,8 +6,8 @@
 #include <z3++.h>
 #include <z3_api.h>
 
-z3::expr FindDatatype(smt_result decl_result);
-z3::expr FindInt(smt_result decl_result);
+z3::expr FindDatatype(smt_func decl_result);
+z3::expr FindInt(smt_const decl_result);
 
 void CheckZ3Interp(z3::func_decl interp) {
   // TODO:Find a way to detect which interps are usable and which are not.
