@@ -35,19 +35,21 @@ int main(int argc, char **argv) {
   z3::model m = s.get_model();
 
   for (int i = 0; i < 1 /*m.num_consts()*/; i++) {
-    smt_const decl_result = {
+    std::optional<z3::expr> sat_res;
+
+    smt_func i_const = {
         .sol = s,
         .decl = m.get_const_decl(i),
         .sort = m.get_const_decl(i).range().sort_kind(),
+        .from = 0,
+        .to = 0,
     };
-    std::optional<z3::expr> found_val;
 
-    // TODO: CheckZ3Interp(m.get_const_decl(c_decl)); if usable, return.
-    // Return valid Int, Bool, String, Datatype expr.
-    found_val = FindConstant(decl_result);
+    sat_res = FindConstant(i_const);
 
-    for (int j = 0; j < found_val.value().num_args(); j++) {
-      std::cout << found_val.value().arg(j).to_string() << "\n";
+    if (!sat_res.has_value()) {
+      printf("No value found\n");
     }
+    std::cout << sat_res.value() << "\n";
   }
 }
