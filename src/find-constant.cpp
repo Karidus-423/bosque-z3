@@ -1,28 +1,24 @@
+// TODO: Make a macro to make sure that sol.check() is inside push() pop(); Or
+// something similar that confirms this action.
 #include "bsq-gen.h"
 #include <cstdio>
 #include <iostream>
-#include <optional>
+#include <vector>
 #include <z3++.h>
 #include <z3_api.h>
 
-z3::expr FindDatatype(smt_func res);
-z3::expr FindFunc(smt_func res);
-z3::expr FindInt(smt_func res);
-z3::expr FindString(smt_func res);
+z3::expr FindConstant(smt_func vex) {
+  z3::expr result = vex.sol.ctx().real_const("N/A");
 
-// Return SAT constant expr.
-std::optional<z3::expr> FindConstant(smt_func const_res) {
-  z3::expr result = const_res.sol.ctx().real_const("N/A");
-
-  switch (const_res.sort) {
+  switch (vex.sort) {
   case Z3_INT_SORT:
-    result = FindInt(const_res);
+    result = FindInt(vex);
     break;
   case Z3_DATATYPE_SORT:
-    result = FindDatatype(const_res);
+    result = FindDatatype(vex);
     break;
   case Z3_SEQ_SORT:
-    result = FindString(const_res);
+    result = FindCString(vex);
     break;
   default:
     break;
@@ -32,7 +28,7 @@ std::optional<z3::expr> FindConstant(smt_func const_res) {
 }
 
 smt_func InitFunc(z3::func_decl func, z3::solver &s) {
-  smt_func res = {
+  smt_func vex = {
       .sol = s,
       .decl = func,
       .sort = func.range().sort_kind(),
@@ -41,10 +37,9 @@ smt_func InitFunc(z3::func_decl func, z3::solver &s) {
       .result = "N/A",
   };
 
-  return res;
+  return vex;
 }
 
-// Return SAT Func expr with arguments from func_decl.
 z3::expr FindFunc(smt_func func) {
   z3::expr result = func.sol.ctx().real_const("Func: N/A");
   z3::expr_vector args = func.sol.ctx();
@@ -54,20 +49,19 @@ z3::expr FindFunc(smt_func func) {
   return result;
 }
 
-// Return SAT Datatype expr for res.
-z3::expr FindDatatype(smt_func res) {
-  z3::expr result = res.sol.ctx().real_const("DATATYPE: N/A");
-  z3::func_decl_vector constructs = res.decl.range().constructors();
+z3::expr FindDatatype(smt_func vex) {
+  z3::expr result = vex.sol.ctx().real_const("DATATYPE: N/A");
+  z3::func_decl_vector constructs = vex.decl.range().constructors();
 
   for (int i = 0; i < constructs.size(); i++) {
-    smt_func construct = InitFunc(constructs[i], res.sol);
+    smt_func construct = InitFunc(constructs[i], vex.sol);
 
-    res.sol.push();
+    vex.sol.push();
 
     z3::expr construct_tmp = FindFunc(construct);
-    z3::check_result rr = res.sol.check();
+    z3::check_result rr = vex.sol.check();
 
-    res.sol.pop();
+    vex.sol.pop();
     if (rr == z3::sat) {
       result = construct_tmp;
     }
@@ -75,22 +69,75 @@ z3::expr FindDatatype(smt_func res) {
   return result;
 };
 
-// Return SAT Integer expr for res.
-z3::expr FindInt(smt_func res) {
-  z3::expr result = res.sol.ctx().real_const("Int: N/A");
+// NOTE: Could Add flags to be used for FindStringLen. Since they are the same.
+z3::expr FindInt(smt_func vex) {
+  std::vector<int> choices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  z3::expr result = vex.sol.ctx().real_const("Int: N/A");
+
+  for (int i : choices) {
+    vex.sol.push();
+    z3::expr int_tmp = vex.sol.ctx().int_val(i);
+
+    vex.sol.add(vex.decl() == int_tmp);
+
+    z3::check_result rr = vex.sol.check();
+    vex.sol.pop();
+    if (rr == z3::sat) {
+      result = int_tmp;
+      break;
+    }
+  }
   return result;
 }
 
-z3::expr FindString(smt_func res) {
-  z3::expr result = res.sol.ctx().real_const("String: N/A");
-  z3::expr str_tmp = res.sol.ctx().string_val("Manchester", 10);
+z3::expr FindStringLen(smt_func vex) {
+  std::vector<int> choices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  z3::expr result = vex.sol.ctx().real_const("Int String: N/A");
 
-  res.sol.push();
+  for (int i : choices) {
+    vex.sol.push();
+    z3::expr len_tmp = vex.sol.ctx().int_val(i);
 
-  res.sol.add(res.decl() == str_tmp);
-  std::cout << res.sol.check() << "\n";
+    vex.sol.add(vex.decl().length() == len_tmp);
 
-  res.sol.pop();
+    z3::check_result rr = vex.sol.check();
+    vex.sol.pop();
+    if (rr == z3::sat) {
+      result = len_tmp;
+      break;
+    }
+  }
+
+  return result;
+}
+
+z3::expr MakeChar(smt_func vex, char c) {
+  Z3_ast r = Z3_mk_char(vex.sol.ctx(), c);
+  return z3::expr(vex.sol.ctx(), r);
+}
+
+z3::expr FindCString(smt_func vex) {
+  z3::expr result = vex.sol.ctx().real_const("String: N/A");
+  vex.sol.ctx().string_val("TEST");
+  z3::expr str_len = FindStringLen(vex);
+
+  for (int i = 0; i < str_len; i++) {
+    vex.sol.push();
+    z3::expr try_char = MakeChar(vex, 'M');
+    z3::expr index = vex.sol.ctx().int_val(i);
+
+    z3::expr assert_nth(vex.decl().nth(index) == try_char);
+
+    vex.sol.add(assert_nth);
+
+    z3::check_result rr = vex.sol.check();
+    vex.sol.pop();
+    // TODO: If found char is SAT. Add it as a fact and move to the next.
+    if (rr == z3::sat) {
+      result = str_tmp;
+      break;
+    }
+  }
 
   return result;
 }

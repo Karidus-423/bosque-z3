@@ -11,6 +11,13 @@ typedef struct smt_func {
   std::string result;
 } smt_func;
 
-void CheckZ3Interp(z3::func_decl interp);
-
-std::optional<z3::expr> FindConstant(smt_func decl_result);
+// Return SAT constant expr.
+z3::expr FindConstant(smt_func decl_result);
+// Return SAT Datatype expr for res.
+z3::expr FindDatatype(smt_func vex);
+// Return SAT Func expr with arguments from func_decl.
+z3::expr FindFunc(smt_func vex);
+// Return SAT Integer expr for res.
+z3::expr FindInt(smt_func vex);
+// Get SAT Seq of ASCII Char.
+z3::expr FindCString(smt_func vex);

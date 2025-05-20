@@ -35,8 +35,6 @@ int main(int argc, char **argv) {
   z3::model m = s.get_model();
 
   for (int i = 0; i < 1 /*m.num_consts()*/; i++) {
-    std::optional<z3::expr> sat_res;
-
     smt_func i_const = {
         .sol = s,
         .decl = m.get_const_decl(i),
@@ -45,11 +43,7 @@ int main(int argc, char **argv) {
         .to = 0,
     };
 
-    sat_res = FindConstant(i_const);
-
-    if (!sat_res.has_value()) {
-      printf("No value found\n");
-    }
-    std::cout << sat_res.value() << "\n";
+    z3::expr sat_res = FindConstant(i_const);
+    std::cout << sat_res << "\n";
   }
 }
