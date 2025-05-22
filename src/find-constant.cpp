@@ -69,7 +69,6 @@ z3::expr FindDatatype(smt_func vex) {
   return result;
 };
 
-// NOTE: Could Add flags to be used for FindStringLen. Since they are the same.
 z3::expr FindInt(smt_func vex) {
   std::vector<int> choices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   z3::expr result = vex.sol.ctx().real_const("Int: N/A");
@@ -116,6 +115,16 @@ z3::expr MakeChar(smt_func vex, char c) {
   return z3::expr(vex.sol.ctx(), r);
 }
 
+z3::expr BinSearchChar(smt_func vex, z3::expr index) {
+  int min = 0;
+  int max = 255;
+  z3::expr found_char = vex.sol.ctx().real_const("Char: N/A");
+  z3::expr try_char = MakeChar(vex, 'M');
+  z3::expr assert_nth(vex.decl().nth(index) == try_char);
+  vex.sol.add(assert_nth);
+  return found_char;
+}
+
 z3::expr FindCString(smt_func vex) {
   z3::expr result = vex.sol.ctx().real_const("String: N/A");
   vex.sol.ctx().string_val("TEST");
@@ -123,21 +132,12 @@ z3::expr FindCString(smt_func vex) {
 
   for (int i = 0; i < str_len; i++) {
     vex.sol.push();
-    z3::expr try_char = MakeChar(vex, 'M');
     z3::expr index = vex.sol.ctx().int_val(i);
 
-    z3::expr assert_nth(vex.decl().nth(index) == try_char);
-
-    vex.sol.add(assert_nth);
-
-    z3::check_result rr = vex.sol.check();
+    z3::expr sat_char = BinSearchChar(vex, index);
     vex.sol.pop();
-    // TODO: If found char is SAT. Add it as a fact and move to the next.
-    if (rr == z3::sat) {
-      result = str_tmp;
-      break;
-    }
   }
+  z3::check_result rr = vex.sol.check();
 
   return result;
 }
