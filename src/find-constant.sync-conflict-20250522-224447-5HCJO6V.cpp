@@ -3,13 +3,9 @@
 #include "bsq-gen.h"
 #include <cstdio>
 #include <iostream>
-#include <string>
 #include <vector>
 #include <z3++.h>
 #include <z3_api.h>
-
-#define MIN_CHAR 0
-#define MAX_CHAR 255
 
 z3::expr FindConstant(smt_func vex) {
   z3::expr result = vex.sol.ctx().real_const("N/A");
@@ -119,60 +115,29 @@ z3::expr MakeChar(smt_func vex, char c) {
   return z3::expr(vex.sol.ctx(), r);
 }
 
-// Return SAT char
-std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
-                                  int max) {
-  while (min < max) {
-    char mid = (max / 2) + (min / 2) + (((max % 2) + (min % 2)) / 2);
-
-    vex.sol.push();
-
-    z3::expr char_tmp = MakeChar(vex, mid);
-    vex.sol.add(vex.decl().nth(index).char_to_int() < char_tmp.char_to_int());
-    z3::check_result rr = vex.sol.check();
-
-    vex.sol.pop();
-
-    if (rr == z3::check_result::sat) {
-      max = mid;
-    } else if (rr == z3::check_result::unsat) {
-      min = mid + 1;
-    } else {
-      return std::nullopt;
-    }
-  }
-  return (char)max - 1;
+z3::expr BinSearchChar(smt_func vex, z3::expr index) {
+  int min = 0;
+  int max = 255;
+  z3::expr found_char = vex.sol.ctx().real_const("Char: N/A");
+  z3::expr try_char = MakeChar(vex, 'M');
+  z3::expr assert_nth(vex.decl().nth(index) == try_char);
+  vex.sol.add(assert_nth);
+  return found_char;
 }
 
 z3::expr FindCString(smt_func vex) {
   z3::expr result = vex.sol.ctx().real_const("String: N/A");
   vex.sol.ctx().string_val("TEST");
   z3::expr str_len = FindStringLen(vex);
-  std::cout << "STR LENGTH: " << str_len << "\n";
 
-  std::string str_tmp("");
-
-  for (int i = 0; i < str_len.get_numeral_int(); i++) {
+  for (int i = 0; i < str_len; i++) {
+    vex.sol.push();
     z3::expr index = vex.sol.ctx().int_val(i);
-    std::optional<char> sat_char =
-        BinSearchChar(vex, index, MIN_CHAR, MAX_CHAR);
-    if (sat_char.has_value()) {
-      str_tmp += sat_char.value();
-    } else {
-      str_tmp.append("{}");
-    }
-  }
-  std::cout << "STRING TO SAT: " << str_tmp << "\n";
 
-  vex.sol.push();
-  z3::expr str_expr = vex.sol.ctx().string_val(str_tmp);
-  vex.sol.add(vex.decl() == str_expr);
+    z3::expr sat_char = BinSearchChar(vex, index);
+    vex.sol.pop();
+  }
   z3::check_result rr = vex.sol.check();
-  vex.sol.pop();
-
-  if (rr == z3::sat) {
-    result = str_expr;
-  }
 
   return result;
 }
