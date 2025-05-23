@@ -11,6 +11,9 @@ typedef struct smt_func {
   std::string result;
 } smt_func;
 
+// Utils
+z3::model InitModel(const char *smt_file, z3::solver &s);
+
 // Return SAT constant expr.
 z3::expr FindConstant(smt_func decl_result);
 // Return SAT Datatype expr for res.
@@ -21,3 +24,5 @@ z3::expr FindFunc(smt_func vex);
 z3::expr FindInt(smt_func vex);
 // Get SAT Seq of ASCII Char.
 z3::expr FindCString(smt_func vex);
+
+extern std::string CString_smt;
