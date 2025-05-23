@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
         "utils.cpp",
         "find-constant.cpp",
         "tests.cpp",
-        "test_files.cpp",
+        "test-smts.cpp",
     };
 
     exe.addCSourceFiles(.{

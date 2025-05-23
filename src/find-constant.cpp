@@ -1,5 +1,3 @@
-// TODO: Make a macro to make sure that sol.check() is inside push() pop(); Or
-// something similar that confirms this action.
 #include "bsq-gen.h"
 #include <cstdio>
 #include <iostream>
@@ -8,8 +6,10 @@
 #include <z3++.h>
 #include <z3_api.h>
 
-#define MIN_CHAR 0
-#define MAX_CHAR 255
+#define MIN_ASCII 0
+#define MAX_ASCII 255
+#define MIN_UTF8 0
+#define MAX_UTF8 512
 
 z3::expr FindConstant(smt_func vex) {
   z3::expr result = vex.sol.ctx().real_const("N/A");
@@ -31,19 +31,6 @@ z3::expr FindConstant(smt_func vex) {
   return result;
 }
 
-smt_func InitFunc(z3::func_decl func, z3::solver &s) {
-  smt_func vex = {
-      .sol = s,
-      .decl = func,
-      .sort = func.range().sort_kind(),
-      .from = 0,
-      .to = func.arity(),
-      .result = "N/A",
-  };
-
-  return vex;
-}
-
 z3::expr FindFunc(smt_func func) {
   z3::expr result = func.sol.ctx().real_const("Func: N/A");
   z3::expr_vector args = func.sol.ctx();
@@ -54,23 +41,19 @@ z3::expr FindFunc(smt_func func) {
 }
 
 z3::expr FindDatatype(smt_func vex) {
-  z3::expr result = vex.sol.ctx().real_const("DATATYPE: N/A");
-  z3::func_decl_vector constructs = vex.decl.range().constructors();
-
-  for (int i = 0; i < constructs.size(); i++) {
-    smt_func construct = InitFunc(constructs[i], vex.sol);
-
+  // Get Datatype from constant.
+  z3::sort vex_dt = vex.decl.range();
+  z3::func_decl_vector dt = vex_dt.constructors();
+  for (int i = 0; i < dt.size(); i++) {
+    smt_func construct = InitFunc(dt[i], vex.sol);
     vex.sol.push();
 
-    z3::expr construct_tmp = FindFunc(construct);
-    z3::check_result rr = vex.sol.check();
+    z3::expr sat_construct = FindFunc(construct);
 
     vex.sol.pop();
-    if (rr == z3::sat) {
-      result = construct_tmp;
-    }
   }
-  return result;
+
+  return vex.sol.ctx().string_val("Under Construction");
 };
 
 z3::expr FindInt(smt_func vex) {
@@ -114,11 +97,6 @@ z3::expr FindStringLen(smt_func vex) {
   return result;
 }
 
-z3::expr MakeChar(smt_func vex, char c) {
-  Z3_ast r = Z3_mk_char(vex.sol.ctx(), c);
-  return z3::expr(vex.sol.ctx(), r);
-}
-
 // Return SAT char
 std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
                                   int max) {
@@ -141,6 +119,10 @@ std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
       return std::nullopt;
     }
   }
+
+  z3::expr char_const = MakeChar(vex, max - 1);
+  vex.sol.add(vex.decl().nth(index) == char_const);
+
   return (char)max - 1;
 }
 
@@ -148,21 +130,19 @@ z3::expr FindCString(smt_func vex) {
   z3::expr result = vex.sol.ctx().real_const("String: N/A");
   vex.sol.ctx().string_val("TEST");
   z3::expr str_len = FindStringLen(vex);
-  std::cout << "STR LENGTH: " << str_len << "\n";
 
   std::string str_tmp("");
 
   for (int i = 0; i < str_len.get_numeral_int(); i++) {
     z3::expr index = vex.sol.ctx().int_val(i);
     std::optional<char> sat_char =
-        BinSearchChar(vex, index, MIN_CHAR, MAX_CHAR);
+        BinSearchChar(vex, index, MIN_ASCII, MAX_ASCII);
     if (sat_char.has_value()) {
       str_tmp += sat_char.value();
     } else {
       str_tmp.append("{}");
     }
   }
-  std::cout << "STRING TO SAT: " << str_tmp << "\n";
 
   vex.sol.push();
   z3::expr str_expr = vex.sol.ctx().string_val(str_tmp);

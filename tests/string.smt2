@@ -81,9 +81,8 @@
 (assert (is-@Result-ok Main@s-cc-temp))
 (assert (= Main@s (@Result-value Main@s-cc-temp)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TODO: Make it String bound to ASCII characters due to CString.
-(declare-const a_str String)
-(declare-const res (@Result String))
-(assert (= res (Main@main a_str)))
-
-(assert (= res @Result-err-other))
+;; Seems to work without buttom statements.
+;;(declare-const a_str String)
+;;(declare-const res (@Result String))
+;;(assert (= res (Main@main a_str)))
+;;(assert (= res @Result-err-other))

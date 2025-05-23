@@ -1,19 +1,37 @@
 #include "bsq-gen.h"
+#include <iostream>
 #include <z3++.h>
 
-z3::model InitModel(const char *smt_file, z3::solver &s) {
-
-  s.add(s.ctx().parse_file(smt_file));
+std::optional<z3::model> InitModel(const char *smt_file, z3::solver &s) {
+  s.add(s.ctx().parse_string(smt_file));
 
   switch (s.check()) {
   case z3::sat:
-    printf("--------Formula:\033[1;34mSAT\033[0m-------------\n");
     break;
-    // TODO: Handle UNSAT and UNKNOWN
   case z3::unsat:
-    printf("Got Unsat\n");
+    return std::nullopt;
   case z3::unknown:
-    printf("Got Unknown\n");
+    return std::nullopt;
   }
-  return s.get_model();
+
+  z3::model m = s.get_model();
+  return m;
+}
+
+smt_func InitFunc(z3::func_decl func, z3::solver &s) {
+  smt_func vex = {
+      .sol = s,
+      .decl = func,
+      .sort = func.range().sort_kind(),
+      .from = 0,
+      .to = func.arity(),
+      .result = "N/A",
+  };
+
+  return vex;
+}
+
+z3::expr MakeChar(smt_func vex, char c) {
+  Z3_ast r = Z3_mk_char(vex.sol.ctx(), c);
+  return z3::expr(vex.sol.ctx(), r);
 }
