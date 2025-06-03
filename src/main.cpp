@@ -12,9 +12,9 @@ void BsqCString() {
   const char *actual = TestCString(c_string_smt);
   const char *expect = "Manchester";
   if (strcmp(actual, expect)) {
-    std::cout << "CString: Passed" << "\n";
+    std::cout << "CString: PASSED" << "\n";
   } else {
-    printf("Expected: %s, Got: %s", expect, actual);
+    printf("FAILED: Expected-> %s, Got-> %s", expect, actual);
   };
 };
 

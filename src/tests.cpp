@@ -69,6 +69,7 @@ const char *TestDataType(const char *smt_file) {
 
     if (smt_const.range().is_datatype() && i == 0) {
       smt_func vex = InitFunc(m.value().get_const_decl(i), s);
+      std::cout << m.value().get_const_decl(i) << "\n";
 
       z3::expr sat_string = FindConstant(vex);
 

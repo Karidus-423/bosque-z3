@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <z3++.h>
+#include <z3.h>
 #include <z3_api.h>
 
 #define MIN_ASCII 0
@@ -31,29 +32,52 @@ z3::expr FindConstant(smt_func vex) {
   return result;
 }
 
-z3::expr FindFunc(smt_func func) {
-  z3::expr result = func.sol.ctx().real_const("Func: N/A");
-  z3::expr_vector args = func.sol.ctx();
-  args.push_back(func.sol.ctx().int_val(1));
-  args.push_back(func.sol.ctx().int_val(0));
-  result = func.decl(args);
+z3::expr FindFunc(smt_func vexf) {
+  z3::expr result = vexf.sol.ctx().real_const("Func: N/A");
+
+  vexf.sol.push();
+  z3::expr_vector args(vexf.sol.ctx());
+  z3::expr arg1 = vexf.sol.ctx().int_val(1);
+  args.push_back(arg1);
+  z3::expr arg2 = vexf.sol.ctx().int_val(0);
+  args.push_back(arg2);
+
+  vexf.sol.add(vexf.decl() == vexf.decl(args));
+  z3::check_result rr = vexf.sol.check();
+  vexf.sol.pop();
+
   return result;
 }
 
 z3::expr FindDatatype(smt_func vex) {
-  // Get Datatype from constant.
-  z3::sort vex_dt = vex.decl.range();
-  z3::func_decl_vector dt = vex_dt.constructors();
-  for (int i = 0; i < dt.size(); i++) {
-    smt_func construct = InitFunc(dt[i], vex.sol);
-    vex.sol.push();
+  z3::expr result = vex.sol.ctx().real_const("Datatype: N/A");
 
-    z3::expr sat_construct = FindFunc(construct);
+  z3::func_decl_vector vex_dt = vex.decl.range().constructors();
+  vex.sol.push();
 
-    vex.sol.pop();
+  z3::constructors constructs_tmp(vex.sol.ctx());
+
+  for (int i = 0; i < vex_dt.size(); i++) {
+    smt_func vex_entity = InitFunc(vex_dt[i], vex.sol);
+    z3::expr construct_tmp = FindFunc(vex_entity);
+    // constructs_tmp.push_back(construct_tmp);
   }
 
-  return vex.sol.ctx().string_val("Under Construction");
+  z3::symbol tmp_sym = vex.sol.ctx().str_symbol("tmp_sym");
+  z3::sort vex_tmp = vex.sol.ctx().datatype(tmp_sym, constructs_tmp);
+
+  z3::func_decl tmp_func = vex.sol.ctx().function(tmp_sym, 0, 0, vex_tmp);
+
+  vex.sol.add(vex.decl() == tmp_func);
+
+  z3::check_result rr = vex.sol.check();
+  vex.sol.pop();
+
+  if (rr == z3::sat) {
+    return vex.sol.ctx().string_val("Worked");
+  } else {
+    return vex.sol.ctx().string_val("Under Construction");
+  }
 };
 
 z3::expr FindInt(smt_func vex) {
@@ -119,11 +143,12 @@ std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
       return std::nullopt;
     }
   }
+  char const_char = max - 1;
 
-  z3::expr char_const = MakeChar(vex, max - 1);
+  z3::expr char_const = MakeChar(vex, const_char);
   vex.sol.add(vex.decl().nth(index) == char_const);
 
-  return (char)max - 1;
+  return const_char;
 }
 
 z3::expr FindCString(smt_func vex) {

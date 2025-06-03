@@ -25,7 +25,6 @@ smt_func InitFunc(z3::func_decl func, z3::solver &s) {
       .sort = func.range().sort_kind(),
       .from = 0,
       .to = func.arity(),
-      .result = "N/A",
   };
 
   return vex;

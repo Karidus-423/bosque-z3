@@ -8,7 +8,6 @@ typedef struct smt_func {
   Z3_sort_kind sort;
   uint from;
   uint to;
-  std::string result;
 } smt_func;
 
 // Utils
@@ -16,12 +15,12 @@ std::optional<z3::model> InitModel(const char *smt_file, z3::solver &s);
 smt_func InitFunc(z3::func_decl func, z3::solver &s);
 z3::expr MakeChar(smt_func vex, char c);
 
+// Return SAT Func with arguments from func_decl.
+z3::expr FindFunc(smt_func vex);
 // Return SAT constant expr.
 z3::expr FindConstant(smt_func decl_result);
 // Return SAT Datatype expr for res.
 z3::expr FindDatatype(smt_func vex);
-// Return SAT Func expr with arguments from func_decl.
-z3::expr FindFunc(smt_func vex);
 // Return SAT Integer expr for res.
 z3::expr FindInt(smt_func vex);
 // Get SAT Seq of ASCII Char.

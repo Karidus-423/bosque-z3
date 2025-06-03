@@ -1,0 +1,50 @@
+BSQAssembly::Assembly{
+    List<BSQAssembly::NamespaceConstDecl>{
+        BSQAssembly::NamespaceConstDecl{ file="/home/kennett/work/bosque-z3/tests/string.bsq", sinfo=BSQAssembly::SourceInfo{ line=3n, column=0n, pos=25n, span=5n }, declaredInNS='Main'<BSQAssembly::NamespaceKey>, attributes=List<BSQAssembly::DeclarationAttibute>{  },  name='s'<BSQAssembly::Identifier>, declaredType=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=3n, column=8n, pos=33n, span=7n }, tkeystr='CString'<TypeKey> }, value=BSQAssembly::LiteralCStringExpression{ sinfo=BSQAssembly::SourceInfo{ line=3n, column=18n, pos=43n, span=12n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=258n, column=42n, pos=7301n, span=6n }, tkeystr='CString'<TypeKey> }, value='Manchester' } }
+    },
+    List<BSQAssembly::ConstMemberDecl>{ },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::NamespaceFunctionDecl>{
+        'Main::main'<BSQAssembly::InvokeKey> => BSQAssembly::NamespaceFunctionDecl{ file="/home/kennett/work/bosque-z3/tests/string.bsq", sinfo=BSQAssembly::SourceInfo{ line=5n, column=7n, pos=65n, span=8n }, declaredInNS='Main'<BSQAssembly::NamespaceKey>, attributes=List<BSQAssembly::DeclarationAttibute>{ BSQAssembly::DeclarationAttibute{name='public'<BSQAssembly::Identifier>, tags=List<(|BSQAssembly::TypeSignature, CString|)>{  }, text=none } },
+            name='main'<BSQAssembly::Identifier>,
+            ikey='Main::main'<BSQAssembly::InvokeKey>, irecursive=BSQAssembly::RecursiveAnnotation#NonRecursiveTag,
+            params=List<BSQAssembly::InvokeParameterDecl>{ BSQAssembly::InvokeParameterDecl{ pname='s'<BSQAssembly::Identifier>, ptype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=24n, pos=82n, span=7n }, tkeystr='CString'<TypeKey> }, defaultval=none, isRefParam=false, isRestParam=false } },
+            resultType=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=34n, pos=92n, span=7n }, tkeystr='CString'<TypeKey> },
+            body=BSQAssembly::StandardBodyImplementation {
+            List<BSQAssembly::Statement>{
+                BSQAssembly::VariableInitializationStatement{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=1n, pos=104n, span=3n }, name='t'<BSQAssembly::Identifier>, vtype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=7n, pos=110n, span=7n }, tkeystr='CString'<TypeKey> }, exp=BSQAssembly::LiteralCStringExpression{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=17n, pos=120n, span=12n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=258n, column=42n, pos=7301n, span=6n }, tkeystr='CString'<TypeKey> }, value='Manchester' } },
+                BSQAssembly::AssertStatement{ sinfo=BSQAssembly::SourceInfo{ line=7n, column=1n, pos=135n, span=6n }, cond=BSQAssembly::BinKeyNotEqExpression{ sinfo=BSQAssembly::SourceInfo{ line=7n, column=8n, pos=142n, span=1n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=23n, column=42n, pos=610n, span=6n }, tkeystr='Bool'<TypeKey> }, opertype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=24n, pos=82n, span=7n }, tkeystr='CString'<TypeKey> }, lhs=BSQAssembly::AccessVariableExpression{ sinfo=BSQAssembly::SourceInfo{ line=7n, column=8n, pos=142n, span=1n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=24n, pos=82n, span=7n }, tkeystr='CString'<TypeKey> }, vname='s'<BSQAssembly::VarIdentifier>, layouttype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=24n, pos=82n, span=7n }, tkeystr='CString'<TypeKey> } }, rhs=BSQAssembly::AccessVariableExpression{ sinfo=BSQAssembly::SourceInfo{ line=7n, column=14n, pos=148n, span=1n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=7n, pos=110n, span=7n }, tkeystr='CString'<TypeKey> }, vname='t'<BSQAssembly::VarIdentifier>, layouttype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=7n, pos=110n, span=7n }, tkeystr='CString'<TypeKey> } } } },
+                BSQAssembly::ReturnSingleStatement{ sinfo=BSQAssembly::SourceInfo{ line=8n, column=4n, pos=155n, span=6n }, rtype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=5n, column=34n, pos=92n, span=7n }, tkeystr='CString'<TypeKey> }, value=BSQAssembly::AccessVariableExpression{ sinfo=BSQAssembly::SourceInfo{ line=8n, column=11n, pos=162n, span=1n }, etype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=7n, pos=110n, span=7n }, tkeystr='CString'<TypeKey> }, vname='t'<BSQAssembly::VarIdentifier>, layouttype=BSQAssembly::NominalTypeSignature{ sinfo=BSQAssembly::SourceInfo{ line=6n, column=7n, pos=110n, span=7n }, tkeystr='CString'<TypeKey> } } }
+            }},
+            preconditions=List<BSQAssembly::PreConditionDecl>{  }, postconditions=List<BSQAssembly::PostConditionDecl>{  },
+            fkind=BSQAssembly::FunctionDeclKindTag#Function
+        }
+    },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::TypeFunctionDecl>{ },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::MethodDeclAbstract>{ },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::MethodDeclVirtual>{ },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::MethodDeclOverride>{ },
+    Map<BSQAssembly::InvokeKey, BSQAssembly::MethodDeclStatic>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::EnumTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::TypedeclTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::PrimitiveEntityTypeDecl>{
+        'Bool'<BSQAssembly::TypeKey> => BSQAssembly::PrimitiveEntityTypeDecl{ file="/home/kennett/work/BosqueCore/bin/core/core.bsq", sinfo=BSQAssembly::SourceInfo{ line=23n, column=42n, pos=610n, span=6n }, declaredInNS='Core'<BSQAssembly::NamespaceKey>, tkey='Bool'<BSQAssembly::TypeKey>, invariants=List<BSQAssembly::InvariantDecl>{  }, validates=List<BSQAssembly::ValidateDecl>{  }, absmethods=List<BSQAssembly::InvokeKey>{  }, virtmethods=List<BSQAssembly::InvokeKey>{  }, overmethods=List<BSQAssembly::InvokeKey>{  }, staticmethods=List<BSQAssembly::InvokeKey>{  }, saturatedProvides=List<BSQAssembly::NominalTypeSignature>{  }, saturatedBFieldInfo=List<BSQAssembly::SaturatedFieldInfo>{  }, allInvariants=List<BSQAssembly::SaturatedInvariantInfo>{  }, allValidates=List<BSQAssembly::SaturatedInvariantInfo>{  } },
+        'CString'<BSQAssembly::TypeKey> => BSQAssembly::PrimitiveEntityTypeDecl{ file="/home/kennett/work/BosqueCore/bin/core/core.bsq", sinfo=BSQAssembly::SourceInfo{ line=258n, column=42n, pos=7301n, span=6n }, declaredInNS='Core'<BSQAssembly::NamespaceKey>, tkey='CString'<BSQAssembly::TypeKey>, invariants=List<BSQAssembly::InvariantDecl>{  }, validates=List<BSQAssembly::ValidateDecl>{  }, absmethods=List<BSQAssembly::InvokeKey>{  }, virtmethods=List<BSQAssembly::InvokeKey>{  }, overmethods=List<BSQAssembly::InvokeKey>{  }, staticmethods=List<BSQAssembly::InvokeKey>{  }, saturatedProvides=List<BSQAssembly::NominalTypeSignature>{  }, saturatedBFieldInfo=List<BSQAssembly::SaturatedFieldInfo>{  }, allInvariants=List<BSQAssembly::SaturatedInvariantInfo>{  }, allValidates=List<BSQAssembly::SaturatedInvariantInfo>{  } }
+    },
+    Map<BSQAssembly::TypeKey, BSQAssembly::ConstructableTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::CollectionTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::EntityTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::DatatypeMemberEntityTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::PrimitiveConceptTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::ConceptTypeDecl>{ },
+    Map<BSQAssembly::TypeKey, BSQAssembly::DatatypeTypeDecl>{ },
+    List<BSQAssembly::InvokeKey>{
+        'Main::main'<BSQAssembly::InvokeKey>
+    },
+    List<BSQAssembly::InvokeKey>{ },
+    List<BSQAssembly::InvokeKey>{ },
+    List<BSQAssembly::TypeKey>{
+        'Bool'<BSQAssembly::TypeKey>,
+        'CString'<BSQAssembly::TypeKey>
+    },
+    List<BSQAssembly::TypeKey>{ }
+}
