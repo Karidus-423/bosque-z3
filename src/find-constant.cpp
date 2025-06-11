@@ -126,11 +126,12 @@ std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
                                   int max) {
   while (min < max) {
     char mid = (max / 2) + (min / 2) + (((max % 2) + (min % 2)) / 2);
+    printf("CURR:-> %c\n", mid);
 
     vex.sol.push();
 
     z3::expr char_tmp = MakeChar(vex, mid);
-    vex.sol.add(vex.decl().nth(index).char_to_int() < char_tmp.char_to_int());
+    vex.sol.add(vex.decl().nth(index).char_to_int() <= char_tmp.char_to_int());
     z3::check_result rr = vex.sol.check();
 
     vex.sol.pop();
@@ -143,7 +144,8 @@ std::optional<char> BinSearchChar(smt_func vex, z3::expr index, int min,
       return std::nullopt;
     }
   }
-  char const_char = max - 1;
+  char const_char = max;
+  printf("---RES: %c----", const_char);
 
   z3::expr char_const = MakeChar(vex, const_char);
   vex.sol.add(vex.decl().nth(index) == char_const);

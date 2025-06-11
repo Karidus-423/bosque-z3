@@ -81,7 +81,7 @@
 (assert (is-@Result-ok Main@s-cc-temp))
 (assert (= Main@s (@Result-value Main@s-cc-temp)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Seems to work without buttom statements.
+;; Seems to work without buttom statements only for primitives
 ;;(declare-const a_str String)
 ;;(declare-const res (@Result String))
 ;;(assert (= res (Main@main a_str)))
